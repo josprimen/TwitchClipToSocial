@@ -30,36 +30,93 @@ class TwitchController extends Controller
     }
 
 
+    function guardarTextoEnArchivo($texto, $nombreArchivo = 'twitch_web.txt' , $sobrescribir = true) {
 
+        if (!Storage::exists($nombreArchivo)) {
+            // Si el archivo no existe, lo crea con el nuevo texto
+            Storage::put($nombreArchivo, $texto);
+        } else {
+            if ($sobrescribir) {
+                // Sobrescribe el archivo si se especifica
+                Storage::put($nombreArchivo, $texto);
+            } else {
+                // Obtiene el contenido actual del archivo y agrega el nuevo texto
+                $contenidoActual = Storage::get($nombreArchivo);
+                $nuevoContenido = $contenidoActual . $texto;
+
+                // Almacena el nuevo contenido en el archivo
+                Storage::put($nombreArchivo, $nuevoContenido);
+            }
+        }
+    }
+
+
+    function descargarVideo($url) {
+
+        try {
+
+            // Carpeta donde se guardarán los videos
+            $carpetaVideos = storage_path('app/videos');
+
+            // Verifica si la carpeta existe, si no, la crea
+            if (!file_exists($carpetaVideos)) {
+                mkdir($carpetaVideos, 0755, true);
+            }
+
+            // Nombre del archivo de salida (puedes personalizarlo según tus necesidades)
+            $nombreArchivo = 'video_descargado.mp4';
+
+            // Ruta completa del archivo de salida
+            $rutaCompleta = $carpetaVideos . '/' . $nombreArchivo;
+
+            // Comando wget para descargar el video
+            $comandoWget = "wget -O \"$rutaCompleta\" \"$url\"";
+
+            // Ejecuta el comando wget
+            shell_exec($comandoWget);
+
+//        // Verifica si el archivo se descargó exitosamente
+//        if (file_exists($rutaCompleta)) {
+//            echo "El video se descargó exitosamente en $rutaCompleta";
+//        } else {
+//            echo "Hubo un problema al descargar el video";
+//        }
+
+        }catch(\Exception $e){
+            dd($e);
+        }
+    }
 
     /**
      * Delete the user's account.
      */
     public function prueba(Request $request): RedirectResponse
     {
-
-
+        try {
 
             // URL de la página web que deseas capturar
-//            $url = 'https://www.twitch.tv/illojuan/clips?featured=false&filter=clips&range=all';
-            $url = 'https://www.marca.com';
+            $url = 'https://www.twitch.tv/illojuan/clips?featured=false&filter=clips&range=all';
+            $this->obtenerUrlClips($url);
 
-            // Usar Browsershot para capturar la pantalla
-//            Browsershot::url($url)
-//                //->content()
-//                ->setOption('waitUntil', 'networkidle0')
-//                ->timeout(60000) // Aumentar el tiempo de espera a 60 segundos
-//                ->save($rutaArchivo);
+        }catch (\Exception $e){
+            dd($e);
+        }
+    }
 
+
+    function obtenerUrlClips($url){
+
+        if (!env('ENTORNO') == 'windows'){
             $body = Browsershot::url($url)
                 ->setOption('waitUntil', 'networkidle0')
                 ->timeout(60000)
                 ->bodyHtml(); // returns the html of the body
-            dd($body);
 
+            $this->guardarTextoEnArchivo($body);
+        }
 
-
-
+        //Limpiamos el archivo
+        $this->guardarTextoEnArchivo('', 'urls_clips.txt', true);
 
 
         // $crawler = new Crawler($html);
@@ -85,20 +142,67 @@ class TwitchController extends Controller
 
             // Agrega la URL completa al array
             $urls[] = $urlCompleta;
+
+            //Añade la URL al archivo de URLs
+            $url_con_coma = $urlCompleta . ",\n";
+            $this->guardarTextoEnArchivo($url_con_coma, 'urls_clips.txt', false);
+
+
         });
 
-        // Verifica si se encontraron elementos
-        if (count($urls) > 0) {
-            // Muestra el array completo (puedes omitir esta línea si no es necesario)
-            dd($urls);
 
-        // Aquí puedes realizar cualquier otra acción con el array de URLs
-        } else {
-            dd('No se encontraron elementos que coincidan con el patrón.');
-            echo "No se encontraron elementos que coincidan con el patrón.\n";
+        foreach ($urls as $url_video){
+            $this->obtenerUrlVideo($url_video);
         }
 
 
+    }
+
+
+    function obtenerUrlVideo($url){
+
+
+        if (!env('ENTORNO') == 'windows'){
+            $body = Browsershot::url($url)
+                ->setOption('waitUntil', 'networkidle0')
+                ->timeout(60000)
+                ->bodyHtml(); // returns the html of the body
+
+            $this->guardarTextoEnArchivo($body);
+        }else{
+            // $crawler = new Crawler($html);
+            $text = Storage::get('clip_example.txt');
+        }
+
+
+
+        //Limpiamos el archivo.
+        $this->guardarTextoEnArchivo('', 'urls_videos.txt', true);
+
+
+
+        $crawler = new Crawler($text);
+
+        // Selecciona todos los elementos que coinciden con el patrón de etiqueta video
+        $elementos = $crawler->filter('video');
+
+        // Inicializa un array para almacenar las URLs
+        $urls = [];
+
+        // Itera sobre cada elemento y extrae la URL del atributo src
+        $elementos->each(function (Crawler $elemento) use (&$urls) {
+            $url = $elemento->attr('src');
+
+            // Agrega la URL completa al array
+            $urls[] = $url;
+            $this->descargarVideo($url);
+
+            // Añade la URL al archivo de URLs
+            $url_con_coma = $url . ",\n";
+             $this->guardarTextoEnArchivo($url_con_coma, 'urls_videos.txt', false);
+        });
+
+        echo $urls;
     }
 
 
