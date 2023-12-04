@@ -23,10 +23,67 @@ class TwitchController extends Controller
 
         Route::group([ 'prefix' => 'twitch', 'as' => 'twitch.' ], function () {
 
+                Route::get('main', [ TwitchController::class, 'prueba' ])->name('prueba');
                 Route::get('prueba', [ TwitchController::class, 'prueba' ])->name('prueba');
 //            Route::post('datatable', [ TwitchController::class, 'datatable' ])->name('datatable');
 
         });
+    }
+
+
+    /**
+     * Metodo principal
+     */
+    public function prueba(Request $request): RedirectResponse
+    {
+        try {
+
+            // URL de la página web que deseas capturar
+            $url = 'https://www.twitch.tv/illojuan/clips?featured=false&filter=clips&range=30d';
+
+//            $url = 'https://www.google.com/';
+            $path = public_path('capturas/marca_com.png');
+
+//            Browsershot::url($url)
+//                ->setNodeBinary('/usr/bin/node') // Ruta al ejecutable de Node.js
+//                ->setNpmBinary('/usr/bin/npm')   // Ruta al ejecutable de npm
+//                ->setChromePath('/usr/bin/chromium-browser') // Ruta al ejecutable de Chromium
+//                ->fullPage()
+//                ->save($path);
+
+//            Browsershot::url($url)
+//                ->setNodeBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/node') // Ruta específica de tu versión de Node.js
+//                ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
+//                ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
+//                ->fullPage()
+//                ->save($path);
+
+
+//            Browsershot::url($url)
+//                ->setNodeBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/node') // Ruta específica de tu versión de Node.js
+//                ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
+//                ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
+//                ->fullPage()
+//                ->noSandbox() // Agrega esta línea para deshabilitar el sandbox
+//                ->save($path);
+//
+//            dd('se ha guardado');
+//
+//
+//
+
+            $body = Browsershot::url($url)
+                ->setNodeBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/node') // Ruta específica de tu versión de Node.js
+                ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
+                ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
+                ->setOption('waitUntil', 'networkidle0')
+                ->timeout(60000)
+                ->bodyHtml(); // returns the html of the body
+            dd($body);
+
+        }catch (\Exception $e){
+            dd($e);
+        }
     }
 
 
@@ -88,9 +145,9 @@ class TwitchController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Metodo principal
      */
-    public function prueba(Request $request): RedirectResponse
+    public function main(Request $request): RedirectResponse
     {
         try {
 
@@ -171,7 +228,7 @@ class TwitchController extends Controller
             $this->guardarTextoEnArchivo($body);
         }else{
             // $crawler = new Crawler($html);
-            $text = Storage::get('clip_example.txt');
+            $body = Storage::get('clip_example.txt');
         }
 
 
@@ -181,7 +238,7 @@ class TwitchController extends Controller
 
 
 
-        $crawler = new Crawler($text);
+        $crawler = new Crawler($body);
 
         // Selecciona todos los elementos que coinciden con el patrón de etiqueta video
         $elementos = $crawler->filter('video');
