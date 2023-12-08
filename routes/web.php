@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
 
 
     \App\Http\Controllers\TwitchController::routes();
+    \App\Http\Controllers\CanalesController::routes();
 
 });
 

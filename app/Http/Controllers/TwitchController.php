@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\UrlCanal;
 use Carbon\Carbon;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -26,21 +28,91 @@ class TwitchController extends Controller
 
                 Route::get('main', [ TwitchController::class, 'prueba' ])->name('prueba');
                 Route::get('prueba', [ TwitchController::class, 'prueba' ])->name('prueba');
+                Route::get('clips-canal-txt', [ TwitchController::class, 'obtenerYAlmacenarClipsTwitchPruebaTxt' ])->name('clips-canal-txt');
+                Route::get('crear-media', [ TwitchController::class, 'crearMedia' ])->name('crear-media');
+                Route::get('publicar-media', [ TwitchController::class, 'publicarMedia' ])->name('publicar-media');
 //            Route::post('datatable', [ TwitchController::class, 'datatable' ])->name('datatable');
 
         });
     }
 
+    public function crearMedia(){
+        try {
+
+            $curl = curl_init();
+            $instagram_id = env('INSTAGRAM_ID');
+            $access_token = env('API_GRAPH_ACCESS_TOKEN');
+            $url_video = env('URL_VIDEO_EXAMPLE', 'tu_url');
+            $caption = 'tu_caption';
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://graph.facebook.com/v18.0/'. $instagram_id.'/media?video_url='. $url_video .'&caption='. $caption .'&media_type=REELS&access_token=' . $access_token,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_HTTPHEADER => array(
+                    'Cookie: sb=bDtzZbBNqvRVK_x44b2Odt4-'
+                ),
+            ));
+
+            $response = curl_exec($curl);
+
+            curl_close($curl);
+
+            dd($response);
+
+        }catch (\Exception $e){
+            dd($e);
+        }
+    }
+
+    public function publicarMedia(){
+        try {
+
+            $curl = curl_init();
+
+            $instagram_id = env('INSTAGRAM_ID');
+            $access_token = env('API_GRAPH_ACCESS_TOKEN');
+            $creation_id = 'Viene en la response del anterior metodo';
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://graph.facebook.com/v18.0/'. $instagram_id .'/media_publish?creation_id='. $creation_id .'&access_token=' . $access_token,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_HTTPHEADER => array(
+                    'Cookie: sb=bDtzZbBNqvRVK_x44b2Odt4-'
+                ),
+            ));
+
+            $response = curl_exec($curl);
+
+            curl_close($curl);
+
+
+        }catch (\Exception $e){
+            dd($e);
+        }
+    }
+
 
     /**
-     * Metodo principal
+     * Método de prueba que recopila y descarga los clips de twitch de un canal de twitch que indiquemos.
+     * La url tiene que tener el formato de ejemplo.
      */
-    public function prueba(Request $request): RedirectResponse
+    public function obtenerYAlmacenarClipsTwitchPruebaTxt(Request $request): RedirectResponse
     {
         try {
 
             // URL de la página web que deseas capturar
-            $url = 'https://www.twitch.tv/illojuan/clips?featured=false&filter=clips&range=30d';
+            $url = 'https://www.twitch.tv/rubius/clips?featured=false&filter=clips&range=30d';
 
             //Limpiamos el archivo
             $this->guardarTextoEnArchivo('', 'twitch_web.txt', true);
@@ -127,8 +199,7 @@ class TwitchController extends Controller
                 });
             }
 
-            dd('terminado proceso');
-
+            dd('Proceso terminado! Tienes los clips en la carpeta storage/app/videos y los txt con los enlaces en storage/app.');
 
         }catch (\Exception $e){
             dd($e);
