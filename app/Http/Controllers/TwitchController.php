@@ -42,7 +42,7 @@ class TwitchController extends Controller
             $curl = curl_init();
             $instagram_id = env('INSTAGRAM_ID');
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
-            $url_video = env('URL_VIDEO_EXAMPLE', 'tu_url');
+            $url_video = env('URL_VIDEO_EXAMPLE');
             $caption = 'tu_caption';
             curl_setopt_array($curl, array(
                 CURLOPT_URL => 'https://graph.facebook.com/v18.0/'. $instagram_id.'/media?video_url='. $url_video .'&caption='. $caption .'&media_type=REELS&access_token=' . $access_token,
@@ -62,6 +62,7 @@ class TwitchController extends Controller
 
             curl_close($curl);
 
+            //{"id":"17911153670853344"}
             dd($response);
 
         }catch (\Exception $e){
@@ -76,7 +77,7 @@ class TwitchController extends Controller
 
             $instagram_id = env('INSTAGRAM_ID');
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
-            $creation_id = 'Viene en la response del anterior metodo';
+            $creation_id = '17989606916585970';
 
             curl_setopt_array($curl, array(
                 CURLOPT_URL => 'https://graph.facebook.com/v18.0/'. $instagram_id .'/media_publish?creation_id='. $creation_id .'&access_token=' . $access_token,
@@ -95,6 +96,8 @@ class TwitchController extends Controller
             $response = curl_exec($curl);
 
             curl_close($curl);
+
+            dd($response);
 
 
         }catch (\Exception $e){

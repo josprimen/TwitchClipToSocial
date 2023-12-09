@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('url');
+            $table->text('url');
             $table->boolean('subido')->default(false);
             $table->boolean('descargado_video')->default(false);
 
