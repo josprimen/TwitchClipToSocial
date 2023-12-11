@@ -167,6 +167,10 @@ class CanalesController extends Controller
                         $video->url = $url;
                         $video->id_url_clip = $clip->id;
                         $video->save();
+
+                        $clip->obtenido_video = true;
+                        $clip->save();
+
                     }
 
 
