@@ -27,6 +27,8 @@ class Video extends Model
         'subido',
         'descargado_video',
         'id_url_clip',
+        'id_contenedor_publicacion',
+        'id_publicacion',
 
     ];
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\UrlCanal;
+use App\Models\Video;
 use Carbon\Carbon;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\RedirectResponse;
@@ -36,14 +37,17 @@ class TwitchController extends Controller
         });
     }
 
-    public function crearMedia(){
+    public function crearMedia($id_video){
         try {
+
+            $video = Video::findOrFail($id_video);
+
 
             $curl = curl_init();
             $instagram_id = env('INSTAGRAM_ID');
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
-            $url_video = env('URL_VIDEO_EXAMPLE');
-            $caption = 'tu_caption';
+            $url_video = $video->url;
+            $caption = $video->clip->titulo_clip ?? 'JAJAJAJAJA';
             curl_setopt_array($curl, array(
                 CURLOPT_URL => 'https://graph.facebook.com/v18.0/'. $instagram_id.'/media?video_url='. $url_video .'&caption='. $caption .'&media_type=REELS&access_token=' . $access_token,
                 CURLOPT_RETURNTRANSFER => true,
@@ -62,6 +66,9 @@ class TwitchController extends Controller
 
             curl_close($curl);
 
+            $video->id_contenedor_publicacion = $response['id'] ?? $response;
+            $video->save();
+
             //{"id":"17911153670853344"}
             dd($response);
 
@@ -70,14 +77,17 @@ class TwitchController extends Controller
         }
     }
 
-    public function publicarMedia(){
+    public function publicarMedia($id_video){
         try {
+
+            $video = Video::findOrFail($id_video);
+
 
             $curl = curl_init();
 
             $instagram_id = env('INSTAGRAM_ID');
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
-            $creation_id = '17989606916585970';
+            $creation_id = $video->id_contenedor_publicacion;
 
             curl_setopt_array($curl, array(
                 CURLOPT_URL => 'https://graph.facebook.com/v18.0/'. $instagram_id .'/media_publish?creation_id='. $creation_id .'&access_token=' . $access_token,
@@ -96,6 +106,9 @@ class TwitchController extends Controller
             $response = curl_exec($curl);
 
             curl_close($curl);
+
+            $video->id_publicacion = $response['id'] ?? $response;
+            $video->save();
 
             dd($response);
 

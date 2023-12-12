@@ -16,6 +16,8 @@ return new class extends Migration
             $table->text('url');
             $table->boolean('subido')->default(false);
             $table->boolean('descargado_video')->default(false);
+            $table->string('id_contenedor_publicacion')->nullable();
+            $table->string('id_publicacion')->nullable();
 
             $table->unsignedBigInteger('id_url_clip')->nullable();
             $table->foreign('id_url_clip')->references('id')->on('url_clips');
