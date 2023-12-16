@@ -37,19 +37,29 @@ class TwitchController extends Controller
         });
     }
 
-    public function crearMedia($id_video){
+    public function crearMedia($id_video) {
         try {
-
             $video = Video::findOrFail($id_video);
 
-
             $curl = curl_init();
+
             $instagram_id = env('INSTAGRAM_ID');
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
             $url_video = $video->url;
             $caption = $video->clip->titulo_clip ?? 'JAJAJAJAJA';
+
+            // Utiliza http_build_query para construir la cadena de consulta de manera segura
+            $query_params = http_build_query([
+                'video_url' => $url_video,
+                'caption' => $caption,
+                'media_type' => 'REELS',
+                'access_token' => $access_token,
+            ]);
+
+            $url = 'https://graph.facebook.com/v18.0/' . $instagram_id . '/media?' . $query_params;
+
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://graph.facebook.com/v18.0/'. $instagram_id.'/media?video_url='. $url_video .'&caption='. $caption .'&media_type=REELS&access_token=' . $access_token,
+                CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -64,24 +74,24 @@ class TwitchController extends Controller
 
             $response = curl_exec($curl);
 
+            // Agrega esta línea para verificar el código de respuesta HTTP
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            echo 'HTTP Code: ' . $httpCode;
+            echo 'response: ' . $response;
             curl_close($curl);
 
-            $video->id_contenedor_publicacion = $response['id'] ?? $response;
+            $video->id_contenedor_publicacion = json_decode($response)->id;
             $video->save();
 
-            //{"id":"17911153670853344"}
-            dd($response);
-
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             dd($e);
         }
     }
 
-    public function publicarMedia($id_video){
+
+    public function publicarMedia($id_video) {
         try {
-
             $video = Video::findOrFail($id_video);
-
 
             $curl = curl_init();
 
@@ -89,8 +99,16 @@ class TwitchController extends Controller
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
             $creation_id = $video->id_contenedor_publicacion;
 
+            // Utiliza http_build_query para construir la cadena de consulta con parámetros
+            $query_params = http_build_query([
+                'creation_id' => $creation_id,
+                'access_token' => $access_token,
+            ]);
+
+            $url = 'https://graph.facebook.com/v18.0/' . $instagram_id . '/media_publish?' . $query_params;
+
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://graph.facebook.com/v18.0/'. $instagram_id .'/media_publish?creation_id='. $creation_id .'&access_token=' . $access_token,
+                CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -105,18 +123,17 @@ class TwitchController extends Controller
 
             $response = curl_exec($curl);
 
+            // Agrega esta línea para verificar el código de respuesta HTTP
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            echo 'HTTP Code: ' . $httpCode;
+
             curl_close($curl);
 
-            $video->id_publicacion = $response['id'] ?? $response;
-            $video->save();
-
-            dd($response);
-
-
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             dd($e);
         }
     }
+
 
 
     /**

@@ -34,7 +34,7 @@ class PublicarMediaTwitch extends Command
             ->whereNull('id_publicacion')
             ->inRandomOrder()
             ->take(1)
-            ->get();
+            ->first();
         $this->contolador_twitch->publicarMedia($video->id);
 
         $this->comment(PHP_EOL . "FIN PUBLICAR MEDIA" . PHP_EOL);

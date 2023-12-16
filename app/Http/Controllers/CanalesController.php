@@ -132,15 +132,14 @@ class CanalesController extends Controller
     /**
      * Metodo para recopilar la url del clip de un vídeo
      */
-    public function recopilarUrlVideos($clip = 1){
-
+    public function recopilarUrlVideos($clip = 1) {
         try {
             $clip = UrlClip::find($clip);
 
             DB::beginTransaction();
 
             $url = $clip->url;
-            if (isset($url)){
+            if (isset($url)) {
 
                 $body = Browsershot::url($url)
                     ->setNodeBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/node') // Ruta específica de tu versión de Node.js
@@ -155,8 +154,11 @@ class CanalesController extends Controller
                 // Selecciona todos los elementos que coinciden con el patrón de etiqueta video
                 $elementos = $crawler->filter('video');
 
-                // Itera sobre cada elemento y extrae la URL del atributo href
-                $elementos->each(function (Crawler $elemento) use ($clip) {
+                // Inicializa la variable $video
+                $video = null;
+
+                // Itera sobre cada elemento y extrae la URL del atributo src
+                $elementos->each(function (Crawler $elemento) use ($clip, &$video) {
                     $url = $elemento->attr('src');
 
                     // Verifica si ya existe un objeto con la misma URL
@@ -170,23 +172,24 @@ class CanalesController extends Controller
 
                         $clip->obtenido_video = true;
                         $clip->save();
-
                     }
-
-
                 });
+
+                // Commitea la transacción
+                DB::commit();
+
+                // Retorna el objeto $video (puede ser null si no se encontraron videos nuevos)
+                return $video;
 
             }
 
-            DB::commit();
-            return response('Operación exitosa', 200);
+            // Retorna null si no hay URL definida
+            return null;
 
-
-
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
+            // Puedes manejar las excepciones según tus necesidades
             dd($e);
         }
-
     }
 
 

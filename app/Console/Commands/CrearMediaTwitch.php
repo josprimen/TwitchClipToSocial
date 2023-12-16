@@ -19,10 +19,12 @@ class CrearMediaTwitch extends Command
 
     protected $description = '';
 
-    public function __construct(TwitchController $contolador_twitch)
+    public function __construct(TwitchController $contolador_twitch, CanalesController $contolador_canales)
     {
         parent::__construct();
         $this->contolador_twitch = $contolador_twitch;
+        $this->contolador_canales = $contolador_canales;
+
 
     }
 
@@ -30,8 +32,16 @@ class CrearMediaTwitch extends Command
     {
         $this->comment(PHP_EOL . "CREAR MEDIA" . PHP_EOL);
 
-        $video = Video::where('subido', false)->inRandomOrder()->take(1)->get();
-        $this->contolador_twitch->crearMedia($video->id);
+
+
+        $clip = UrlClip::where('obtenido_video', false)->inRandomOrder()->first();
+
+        $video = $this->contolador_canales->recopilarUrlVideos($clip->id);
+
+        if (!is_null($video)){
+            $this->contolador_twitch->crearMedia($video->id);
+        }
+
 
         $this->comment(PHP_EOL . "FIN CREAR MEDIA" . PHP_EOL);
 
