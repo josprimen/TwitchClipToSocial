@@ -9,6 +9,7 @@ use App\Models\UrlCanal;
 use App\Models\UrlClip;
 use App\Models\Video;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -28,16 +29,23 @@ class PublicarMediaTwitch extends Command
 
     public function handle()
     {
-        $this->comment(PHP_EOL . "PUBLICAR MEDIA" . PHP_EOL);
 
-        $video = Video::whereNotNull('id_contenedor_publicacion')
-            ->whereNull('id_publicacion')
-            ->inRandomOrder()
-            ->take(1)
-            ->first();
-        $this->contolador_twitch->publicarMedia($video->id);
+        try {
+            $this->comment(PHP_EOL . "PUBLICAR MEDIA" . PHP_EOL);
 
-        $this->comment(PHP_EOL . "FIN PUBLICAR MEDIA" . PHP_EOL);
+            $video = Video::whereNotNull('id_contenedor_publicacion')
+                ->whereNull('id_publicacion')
+                ->inRandomOrder()
+                ->take(1)
+                ->first();
+            $this->contolador_twitch->publicarMedia($video->id);
+            Log::info('El comando publicar_media_twitch ha sido ejecutado correctamente.');
+
+            $this->comment(PHP_EOL . "FIN PUBLICAR MEDIA" . PHP_EOL);
+        } catch (\Exception $e) {
+            // Log de fracaso con detalles de la excepción
+            Log::error('Error al ejecutar crear_media_twitch: ' . $e->getMessage());
+        }
 
     }
 

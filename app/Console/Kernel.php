@@ -12,7 +12,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Ejecutar el comando crear_media_twitch cada hora
+        $schedule->command('crear_media_twitch')->hourly();
+
+        // Esperar dos minutos y luego ejecutar el comando publicar_media_twitch cada hora
+        $schedule->command('publicar_media_twitch')->hourlyAt(2);
+
+        // Busca nuevos clips entre los canales
+        $schedule->command('actualizar_informacion_clips_twitch')->everyTwoHours();
     }
 
     /**
