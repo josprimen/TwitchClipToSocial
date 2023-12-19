@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 use App\Http\Controllers\CanalesController;
 use App\Models\UrlCanal;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -26,7 +27,7 @@ class ActualizarInformacionClipsTwitch extends Command
     public function handle()
     {
         $this->comment(PHP_EOL . "CARGA INFORMACION CLIPS CANALES" . PHP_EOL);
-
+        Log::info('Inicio recopilacion clips');
         $canales = UrlCanal::all();
         $count = $canales->count();
         $output = new ConsoleOutput();
@@ -37,6 +38,7 @@ class ActualizarInformacionClipsTwitch extends Command
             $bar->advance();
         }
 
+        Log::info('Recopilados clips');
         $bar->finish();
         $this->comment(PHP_EOL . "CARGA INFORMACION TERMINADA" . PHP_EOL);
 

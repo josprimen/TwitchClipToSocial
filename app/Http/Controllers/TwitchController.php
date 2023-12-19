@@ -46,7 +46,7 @@ class TwitchController extends Controller
             $instagram_id = env('INSTAGRAM_ID');
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
             $url_video = $video->url;
-            $hastags = $video->clip->canal->nombre_canal . ' #TwitchClips #HighlightReel #ClipOfTheDay #TwitchHighlight #TwitchCommunity #ContentCreators';
+            $hastags = ' #' . $video->clip->canal->nombre_canal . ' #TwitchClips #HighlightReel #ClipOfTheDay #TwitchHighlight #TwitchCommunity #ContentCreators';
             $caption = $video->clip->titulo_clip . $hastags ?? 'JAJAJAJAJA';
 
             // Utiliza http_build_query para construir la cadena de consulta de manera segura

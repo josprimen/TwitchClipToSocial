@@ -4,9 +4,11 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
+    /**
     /**
      * Define the application's command schedule.
      */
@@ -15,8 +17,8 @@ class Kernel extends ConsoleKernel
         // Ejecutar el comando crear_media_twitch cada hora
         $schedule->command('crear_media_twitch')->hourly();
 
-        // Esperar dos minutos y luego ejecutar el comando publicar_media_twitch cada hora
-        $schedule->command('publicar_media_twitch')->hourlyAt(2);
+        // Esperar cinco minutos y luego ejecutar el comando publicar_media_twitch cada hora
+        $schedule->command('publicar_media_twitch')->hourlyAt(5);
 
         // Busca nuevos clips entre los canales
         $schedule->command('actualizar_informacion_clips_twitch')->everyTwoHours();

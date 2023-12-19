@@ -48,7 +48,7 @@ class CrearMediaTwitch extends Command
             $this->comment(PHP_EOL . "FIN CREAR MEDIA" . PHP_EOL);
         } catch (\Exception $e) {
             // Log de fracaso con detalles de la excepción
-            Log::error('Error al ejecutar crear_media_twitch: ' . $e->getMessage());
+            Log::info('Error al ejecutar crear_media_twitch: ' . $e);
         }
     }
 

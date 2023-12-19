@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -83,6 +84,7 @@ class CanalesController extends Controller
                     ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
                     ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
                     ->setOption('waitUntil', 'networkidle0')
+                    ->setOption('args', ['--no-sandbox'])
                     ->timeout(60000)
                     ->bodyHtml(); // returns the html of the body
 
@@ -122,6 +124,7 @@ class CanalesController extends Controller
 
 
         }catch (\Exception $e){
+            Log::info($e);
             dd($e);
         }
 
@@ -146,6 +149,7 @@ class CanalesController extends Controller
                     ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
                     ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
                     ->setOption('waitUntil', 'networkidle0')
+                    ->setOption('args', ['--no-sandbox'])
                     ->timeout(60000)
                     ->bodyHtml(); // returns the html of the body
 
@@ -188,7 +192,7 @@ class CanalesController extends Controller
 
         } catch (\Exception $e) {
             // Puedes manejar las excepciones según tus necesidades
-            dd($e);
+            Log::info($e);
         }
     }
 
