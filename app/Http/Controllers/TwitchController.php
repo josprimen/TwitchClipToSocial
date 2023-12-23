@@ -9,8 +9,10 @@ use Carbon\Carbon;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -128,11 +130,22 @@ class TwitchController extends Controller
             $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             echo 'HTTP Code: ' . $httpCode;
 
+            $id_publicacion = json_decode($response)->id ?? null;
+
             curl_close($curl);
             $video->subido = true;
+            $video->id_publicacion = $id_publicacion;
             $video->save();
 
+            if(is_null($id_publicacion)) {
+                Log::info('ID PUBLICACION VACÍO:');
+                Log::info($response);
+                Artisan::call('publicar_media_twitch');
+            }
+
+
         } catch (\Exception $e) {
+            Log::info($e);
             dd($e);
         }
     }

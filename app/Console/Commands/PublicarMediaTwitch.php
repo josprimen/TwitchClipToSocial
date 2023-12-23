@@ -34,10 +34,12 @@ class PublicarMediaTwitch extends Command
             $this->comment(PHP_EOL . "PUBLICAR MEDIA" . PHP_EOL);
 
             $video = Video::whereNotNull('id_contenedor_publicacion')
-                ->whereNull('id_publicacion')
+//                ->whereNull('id_publicacion')
+                ->where('subido', 0)
                 ->inRandomOrder()
                 ->take(1)
                 ->first();
+            Log::info('Id video a publicar: ' . $video->id);
             $this->contolador_twitch->publicarMedia($video->id);
             Log::info('El comando publicar_media_twitch ha sido ejecutado correctamente.');
 
