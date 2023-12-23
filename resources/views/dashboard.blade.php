@@ -1,5 +1,9 @@
 <x-app-layout>
-    @if (session('success'))
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+@if (session('success'))
         <div id="successMessage" class="fixed top-0 right-0 m-4 bg-green-500 text-white p-4 rounded-md" role="alert">
             <p class="font-bold">Éxito:</p>
             <p>{{ session('success') }}</p>
@@ -47,7 +51,62 @@
         </div>
     </div>
 
+    <div class="py-5">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="table-responsive">
+                    <table class="table table-row-dashed text-white" id="tabla_canales">
+                        <thead>
+                        <tr>
+                            <th>Canal</th>
+                            <th>url</th>
+                            <th>Fecha de alta</th>
+                            <th>Fecha de baja</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .dataTables_paginate,
+        .dataTables_info,
+        .dataTables_length,
+        .dataTables_processing {
+            color: white !important;
+        }
+
+        .dataTables_paginate a:hover {
+            color: #e2e8f0 !important; /* Cambia el color al pasar el ratón */
+        }
+    </style>
+
+
+    <!-- Incluye jQuery primero -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- Luego, incluye DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css" />
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+    <!-- SweetAlert 2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
+
+    <!-- SweetAlert 2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+
     <script>
+
+
+        var tabla_canales;
+
+        $(document).ready(function () {
+            initTablaCanales();
+        });
+
         // Agregar script para ocultar el mensaje después de 5 segundos
         setTimeout(function() {
             var element = document.getElementById('successMessage');
@@ -55,6 +114,94 @@
                 element.style.display = 'none';
             }
         }, 5000); // 5000 milisegundos = 5 segundos
+
+        function initTablaCanales() {
+            console.log('entra datatable');
+            tabla_canales = $('#tabla_canales').DataTable({
+                pageLength: 10,
+                responsive: true,
+                searchDelay: 500,
+                processing: true,
+                serverSide: true,
+                fixedHeader: true,
+                stateSave: true,
+                dom: `<'row'<'col-sm-6 col-md-6'f><'col-sm-6 col-md-6 botones_datatable'B>>
+                <'row'<'col-sm-12'tr>>
+                <'row'<'col-sm-6 col-md-6'i><'col-sm-3 col-md-3'l><'col-sm-3 col-md-3'p>>r`,
+                ajax: {
+                    url: '{{ route('canales.datatable-canales') }}',
+                    type: 'POST',
+                    data: function (data) {
+                        data._token = '{{ csrf_token() }}';
+                    },
+                },
+                buttons: [
+                    {extend: 'colvis', text: 'COLUMNAS'},
+                    {extend: 'excel', text: 'EXCEL'},
+                    {extend: 'pdf', text: 'PDF'},
+                ],
+                order: [[1, 'desc']],
+                lengthMenu: [[5, 10, 25, 50, 100], [5, 10, 25, 50, 100]],
+                columns: [
+                    {data: 'nombre_canal', name: 'nombre_canal'},
+                    {data: 'url', name: 'url'},
+                    {data: 'created_at', name: 'created_at'},
+                    {data: 'deleted_at', name: 'deleted_at'},
+                    {data: 'action', orderable: false, searchable: false, width: '120px', responsivePriority: -1},
+                ],
+                language: {
+                    url: '{!! asset('js/translations/datatables-es.json') !!}'
+                },
+            });
+        }
+
+        function refrescarTabla() {
+            tabla_canales.draw();
+        }
+
+        function eliminarCanal(id){
+            console.log('entra');
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Quieres desactivar los clips de este canal.",
+                icon: 'warning',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Continuar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                console.log(result)
+                if (result.value) {
+                    $.ajax({
+                        url: '{{ route('canales.cambiar-estado') }}',
+                        type: 'post',
+                        data: {
+                            'canal': id,
+                            '_token': "{{Session::token()}}"
+                        },
+                        success: function (data) {
+                            Swal.fire(
+                                'Listo!',
+                                'Cambio de estado realizado con éxito.',
+                                'success'
+                            );
+
+                            refrescarTabla();
+                        },
+                        error: function (result) {
+                            Swal.fire(
+                                'Error',
+                                'Ha ocurrido un error.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        }
+
+
+
     </script>
 
 </x-app-layout>

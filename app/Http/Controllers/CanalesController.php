@@ -20,6 +20,7 @@ use Illuminate\View\View;
 use Spatie\Browsershot\Browsershot;
 use Sunra\PhpSimple\HtmlDomParser;
 use Symfony\Component\DomCrawler\Crawler;
+use Yajra\DataTables\Facades\DataTables;
 
 class CanalesController extends Controller
 {
@@ -29,9 +30,11 @@ class CanalesController extends Controller
 
         Route::group([ 'prefix' => 'canales', 'as' => 'canales.' ], function () {
 
-                Route::post('guardar', [ CanalesController::class, 'guardar' ])->name('guardar');
-                Route::get('recopilar-clips', [ CanalesController::class, 'recopilarClips' ])->name('recopilar-clips');
-                Route::get('recopilar-videos', [ CanalesController::class, 'recopilarUrlVideos' ])->name('recopilar-videos');
+            Route::post('guardar', [ CanalesController::class, 'guardar' ])->name('guardar');
+            Route::get('recopilar-clips', [ CanalesController::class, 'recopilarClips' ])->name('recopilar-clips');
+            Route::get('recopilar-videos', [ CanalesController::class, 'recopilarUrlVideos' ])->name('recopilar-videos');
+            Route::post('datatable-canales', [ CanalesController::class, 'datatableCanales' ])->name('datatable-canales');
+            Route::post('cambiar-estado', [ CanalesController::class, 'cambiarEstado' ])->name('cambiar-estado');
 
         });
     }
@@ -195,6 +198,63 @@ class CanalesController extends Controller
             Log::info($e);
         }
     }
+
+    /**
+     * Devuelve el listado de canales
+     *
+     */
+
+    public function datatableCanales()
+    {
+        $datos = UrlCanal::select('url_canales.*')->withTrashed();
+
+        return DataTables::eloquent($datos)
+            ->editColumn('created_at', function ($data) {
+                return $data->createdAtFormateada;
+            })
+            ->editColumn('deleted_at', function ($data) {
+                return $data->deletedAtFormateada;
+            })
+            ->addColumn('action', function ($data) {
+//                return '';
+                return view('acciones', compact('data'));
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+
+    /**
+     * Método para inhabilitar canal de twitch y sus clips para que no se publiquen
+     */
+    public function cambiarEstado(Request $request)
+    {
+        try {
+            $canal = UrlCanal::find($request->canal);
+            if (!$canal) {
+                return response('Canal no encontrado', 404);
+            }
+
+            DB::beginTransaction();
+
+            // Cambiar el estado del campo deleted_at
+            if ($canal->trashed()) {
+                // Si está eliminado, lo restauramos
+                $canal->restore();
+            } else {
+                // Si no está eliminado, lo eliminamos
+                $canal->delete();
+            }
+
+            DB::commit();
+
+            return response('Operación exitosa', 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response('Error en la operación', 500);
+        }
+    }
+
 
 
 

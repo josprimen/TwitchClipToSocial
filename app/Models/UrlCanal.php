@@ -13,7 +13,7 @@ class UrlCanal extends Model
 
     use SoftDeletes;
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['created_at', 'deleted_at'];
 
     protected $table = 'url_canales';
 
@@ -40,6 +40,16 @@ class UrlCanal extends Model
     /**************************************************************************/
     /*--------------------------- ATRIBUTOS ---------------------------------*/
     /**************************************************************************/
+
+    public function getCreatedAtFormateadaAttribute()
+    {
+        return is_null($this->created_at) ? '' : $this->created_at->format('H:i d/m/Y');
+    }
+
+    public function getDeletedAtFormateadaAttribute()
+    {
+        return is_null($this->deleted_at) ? '' : $this->deleted_at->format('H:i d/m/Y');
+    }
 
     /**************************************************************************/
     /*--------------------------- MÉTODOS ---------------------------------*/
