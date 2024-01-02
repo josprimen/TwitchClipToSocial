@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <div class="py-5">
+    <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="table-responsive">
@@ -62,6 +62,26 @@
                             <th>url</th>
                             <th>Fecha de alta</th>
                             <th>Fecha de baja</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-5">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="table-responsive">
+                    <table class="table table-row-dashed text-white" id="tabla_clips">
+                        <thead>
+                        <tr>
+                            <th>Canal</th>
+                            <th>titulo</th>
+                            <th>Obtenido Vídeo</th>
+                            <th>Fecha de alta</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
@@ -102,9 +122,11 @@
 
 
         var tabla_canales;
+        var tabla_clips;
 
         $(document).ready(function () {
             initTablaCanales();
+            initTablaClips();
         });
 
         // Agregar script para ocultar el mensaje después de 5 segundos
@@ -116,7 +138,6 @@
         }, 5000); // 5000 milisegundos = 5 segundos
 
         function initTablaCanales() {
-            console.log('entra datatable');
             tabla_canales = $('#tabla_canales').DataTable({
                 pageLength: 10,
                 responsive: true,
@@ -155,12 +176,11 @@
             });
         }
 
-        function refrescarTabla() {
+        function refrescarTablaCanales() {
             tabla_canales.draw();
         }
 
         function eliminarCanal(id){
-            console.log('entra');
             Swal.fire({
                 title: '¿Estás seguro?',
                 text: "Quieres desactivar los clips de este canal.",
@@ -186,7 +206,7 @@
                                 'success'
                             );
 
-                            refrescarTabla();
+                            refrescarTablaCanales();
                         },
                         error: function (result) {
                             Swal.fire(
@@ -198,6 +218,52 @@
                     });
                 }
             });
+        }
+
+
+
+
+        function initTablaClips() {
+            tabla_clips = $('#tabla_clips').DataTable({
+                pageLength: 10,
+                responsive: true,
+                searchDelay: 500,
+                processing: true,
+                serverSide: true,
+                fixedHeader: true,
+                stateSave: true,
+                dom: `<'row'<'col-sm-6 col-md-6'f><'col-sm-6 col-md-6 botones_datatable'B>>
+                <'row'<'col-sm-12'tr>>
+                <'row'<'col-sm-6 col-md-6'i><'col-sm-3 col-md-3'l><'col-sm-3 col-md-3'p>>r`,
+                ajax: {
+                    url: '{{ route('canales.datatable-clips') }}',
+                    type: 'POST',
+                    data: function (data) {
+                        data._token = '{{ csrf_token() }}';
+                    },
+                },
+                buttons: [
+                    {extend: 'colvis', text: 'COLUMNAS'},
+                    {extend: 'excel', text: 'EXCEL'},
+                    {extend: 'pdf', text: 'PDF'},
+                ],
+                order: [[4, 'desc']],
+                lengthMenu: [[5, 10, 25, 50, 100], [5, 10, 25, 50, 100]],
+                columns: [
+                    {data: 'id_url_canal', name: 'id_url_canal'},
+                    {data: 'titulo_clip', name: 'titulo_clip'},
+                    {data: 'obtenido_video', name: 'obtenido_video'},
+                    {data: 'created_at', name: 'created_at'},
+                    {data: 'action', orderable: false, searchable: false, width: '120px', responsivePriority: -1},
+                ],
+                language: {
+                    url: '{!! asset('js/translations/datatables-es.json') !!}'
+                },
+            });
+        }
+
+        function refrescarTablaClips() {
+            tabla_clips.draw();
         }
 
 

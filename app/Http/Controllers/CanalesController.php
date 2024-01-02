@@ -34,6 +34,7 @@ class CanalesController extends Controller
             Route::get('recopilar-clips', [ CanalesController::class, 'recopilarClips' ])->name('recopilar-clips');
             Route::get('recopilar-videos', [ CanalesController::class, 'recopilarUrlVideos' ])->name('recopilar-videos');
             Route::post('datatable-canales', [ CanalesController::class, 'datatableCanales' ])->name('datatable-canales');
+            Route::post('datatable-clips', [ CanalesController::class, 'datatableClips' ])->name('datatable-clips');
             Route::post('cambiar-estado', [ CanalesController::class, 'cambiarEstado' ])->name('cambiar-estado');
 
         });
@@ -217,6 +218,30 @@ class CanalesController extends Controller
             })
             ->addColumn('action', function ($data) {
 //                return '';
+                return view('acciones', compact('data'));
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    /**
+     * Devuelve el listado de clips
+     *
+     */
+
+    public function datatableClips()
+    {
+        $datos = UrlClip::select('url_clips.*');
+
+        return DataTables::eloquent($datos)
+            ->editColumn('created_at', function ($data) {
+                return $data->createdAtFormateada;
+            })
+            ->editColumn('id_url_canal', function ($data) {
+                return $data->canal->nombre_canal ?? 'Canal Borrado';
+            })
+            ->addColumn('action', function ($data) {
+                return '';
                 return view('acciones', compact('data'));
             })
             ->rawColumns(['action'])
