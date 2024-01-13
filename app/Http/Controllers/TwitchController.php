@@ -168,9 +168,9 @@ class TwitchController extends Controller
 
 
             $body = Browsershot::url($url)
-                ->setNodeBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/node') // Ruta específica de tu versión de Node.js
-                ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
-                ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
+                ->setNodeBinary(env('NODE_BINARY_PATH', '/home/vagrant/.nvm/versions/node/v21.2.0/bin/node')) // Ruta específica de tu versión de Node.js
+                ->setNpmBinary(env('NPM_BINARY_PATH', '/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm'))   // Ruta específica de tu versión de npm
+                ->setChromePath(env('CHROMIUM_PATH', '/usr/bin/chromium-browser')) // Ruta específica de tu instalación global de Chromium
                 ->setOption('waitUntil', 'networkidle0')
                 ->timeout(60000)
                 ->bodyHtml(); // returns the html of the body
@@ -220,12 +220,13 @@ class TwitchController extends Controller
 
             foreach ($urls as $url_video){
                 $body = Browsershot::url($url_video)
-                    ->setNodeBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/node') // Ruta específica de tu versión de Node.js
-                    ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
-                    ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
+                    ->setNodeBinary(env('NODE_BINARY_PATH', '/home/vagrant/.nvm/versions/node/v21.2.0/bin/node')) // Ruta específica de tu versión de Node.js
+                    ->setNpmBinary(env('NPM_BINARY_PATH', '/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm'))   // Ruta específica de tu versión de npm
+                    ->setChromePath(env('CHROMIUM_PATH', '/usr/bin/chromium-browser')) // Ruta específica de tu instalación global de Chromium
                     ->setOption('waitUntil', 'networkidle0')
                     ->timeout(60000)
                     ->bodyHtml(); // returns the html of the body
+
                 $crawler = new Crawler($body);
 
                 // Selecciona todos los elementos que coinciden con el patrón de etiqueta video

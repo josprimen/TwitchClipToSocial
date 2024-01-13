@@ -84,9 +84,9 @@ class CanalesController extends Controller
             if (isset($url)){
 
                 $body = Browsershot::url($url)
-                    ->setNodeBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/node') // Ruta específica de tu versión de Node.js
-                    ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
-                    ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
+                    ->setNodeBinary(env('NODE_BINARY_PATH', '/home/vagrant/.nvm/versions/node/v21.2.0/bin/node')) // Ruta específica de tu versión de Node.js
+                    ->setNpmBinary(env('NPM_BINARY_PATH', '/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm'))   // Ruta específica de tu versión de npm
+                    ->setChromePath(env('CHROMIUM_PATH', '/usr/bin/chromium-browser')) // Ruta específica de tu instalación global de Chromium
                     ->setOption('waitUntil', 'networkidle0')
                     ->setOption('args', ['--no-sandbox'])
                     ->timeout(60000)
@@ -149,9 +149,9 @@ class CanalesController extends Controller
             if (isset($url)) {
 
                 $body = Browsershot::url($url)
-                    ->setNodeBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/node') // Ruta específica de tu versión de Node.js
-                    ->setNpmBinary('/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm')   // Ruta específica de tu versión de npm
-                    ->setChromePath('/usr/bin/chromium-browser') // Ruta específica de tu instalación global de Chromium
+                    ->setNodeBinary(env('NODE_BINARY_PATH', '/home/vagrant/.nvm/versions/node/v21.2.0/bin/node')) // Ruta específica de tu versión de Node.js
+                    ->setNpmBinary(env('NPM_BINARY_PATH', '/home/vagrant/.nvm/versions/node/v21.2.0/bin/npm'))   // Ruta específica de tu versión de npm
+                    ->setChromePath(env('CHROMIUM_PATH', '/usr/bin/chromium-browser')) // Ruta específica de tu instalación global de Chromium
                     ->setOption('waitUntil', 'networkidle0')
                     ->setOption('args', ['--no-sandbox'])
                     ->timeout(60000)
