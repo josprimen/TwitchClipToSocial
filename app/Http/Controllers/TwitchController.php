@@ -24,6 +24,13 @@ use Symfony\Component\DomCrawler\Crawler;
 class TwitchController extends Controller
 {
 
+    protected $tratamientoVideoController;
+
+    public function __construct(TratamientoVideoController $tratamientoVideoController)
+    {
+        $this->tratamientoVideoController = $tratamientoVideoController;
+    }
+
     public static function routes()
     {
 
@@ -42,12 +49,20 @@ class TwitchController extends Controller
     public function crearMedia($id_video) {
         try {
             $video = Video::findOrFail($id_video);
+            $flag_con_descarga = false;
 
             $curl = curl_init();
 
             $instagram_id = env('INSTAGRAM_ID');
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
-            $url_video = $video->url;
+            try {
+                $url_video = $this->tratamientoVideoController->transformarVideo916($video->url);
+                $flag_con_descarga = true;
+
+            }catch (\Exception $e){
+                $url_video = $video->url;
+
+            }
             $hastags = ' #' . $video->clip->canal->nombre_canal . ' #TwitchClips #HighlightReel #ClipOfTheDay #TwitchHighlight #TwitchCommunity #ContentCreators';
             $caption = $video->clip->titulo_clip . $hastags ?? 'JAJAJAJAJA';
 
@@ -85,6 +100,8 @@ class TwitchController extends Controller
 
             $video->id_contenedor_publicacion = json_decode($response)->id;
             $video->save();
+
+            if ($flag_con_descarga) unlink($url_video);
 
         } catch (\Exception $e) {
             dd($e);
