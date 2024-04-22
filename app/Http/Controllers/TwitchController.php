@@ -58,9 +58,11 @@ class TwitchController extends Controller
             try {
                 $url_video = $this->tratamientoVideoController->transformarVideo916($video->url);
                 $flag_con_descarga = true;
+                Log::info('Usando formato vertical');
 
             }catch (\Exception $e){
                 $url_video = $video->url;
+                Log::info('Ha habido un fallo en el formato vertical' . $e);
 
             }
             $hastags = ' #' . $video->clip->canal->nombre_canal . ' #TwitchClips #HighlightReel #ClipOfTheDay #TwitchHighlight #TwitchCommunity #ContentCreators';

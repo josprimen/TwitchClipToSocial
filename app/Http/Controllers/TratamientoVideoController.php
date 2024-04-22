@@ -80,7 +80,7 @@ class TratamientoVideoController extends Controller
         }
 
 
-        // Descargar el video en la carpeta public
+        // Descargar el video en la carpeta storage
         $url_video = $url;
         $downloaded_video_path = storage_path('videos/' . 'descargado.mp4');
         $curl = curl_init();
