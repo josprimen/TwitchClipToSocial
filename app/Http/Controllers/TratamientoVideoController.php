@@ -82,7 +82,7 @@ class TratamientoVideoController extends Controller
 
         // Descargar el video en la carpeta storage
         $url_video = $url;
-        $downloaded_video_path = storage_path('videos/' . 'descargado.mp4');
+        $downloaded_video_path = storage_path('app/videos/' . 'descargado.mp4');
         $curl = curl_init();
         $file = fopen($downloaded_video_path, 'wb');
 
@@ -101,7 +101,7 @@ class TratamientoVideoController extends Controller
         // Definir las rutas de entrada y salida para FFmpeg
         $inputVideo1 = $downloaded_video_path;
         $inputVideo2 = $downloaded_video_path; // Usamos el mismo video como segunda entrada
-        $outputVideo = storage_path('videos/output_' . time() . '.mp4'); // Agregar timestamp al nombre del archivo de salida
+        $outputVideo = storage_path('app/videos/output_' . time() . '.mp4'); // Agregar timestamp al nombre del archivo de salida
 
         // Comando de FFmpeg
         $command = "ffmpeg -i $inputVideo1 -i $inputVideo2 -filter_complex \"[0:v]scale=2276:1280,boxblur=4[bg];[1:v]scale=720:-1[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2[tmp];[tmp]crop=720:1280:(2276-720)/2:0[out]\" -map [out] -map 0:a $outputVideo";
