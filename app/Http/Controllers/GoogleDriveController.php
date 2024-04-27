@@ -89,10 +89,13 @@ class GoogleDriveController extends Controller
     protected function getFileUrl($driveService, $fileId)
     {
         // Obtener la información del archivo
-        $file = $driveService->files->get($fileId, ['fields' => 'webViewLink']);
+//        $file = $driveService->files->get($fileId, ['fields' => 'webViewLink']); // Obtiene la url de visualizacion del archivo
+        $file = $driveService->files->get($fileId, ['fields' => 'webContentLink']); // Obtiene la url de descarga directa del archivo
+
 
         // Devolver la URL de visualización del archivo
-        return $file->webViewLink;
+//        return $file->webViewLink;
+        return $file->webContentLink;
     }
 
     /**
