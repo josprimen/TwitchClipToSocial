@@ -103,7 +103,7 @@ class TwitchController extends Controller
             $video->id_contenedor_publicacion = json_decode($response)->id;
             $video->save();
 
-            if ($flag_con_descarga) unlink($url_video);
+//            if ($flag_con_descarga) unlink($url_video);
 
         } catch (\Exception $e) {
             dd($e);
