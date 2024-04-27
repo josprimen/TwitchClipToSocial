@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     \App\Http\Controllers\TwitchController::routes();
     \App\Http\Controllers\CanalesController::routes();
     \App\Http\Controllers\TratamientoVideoController::routes();
+    \App\Http\Controllers\GoogleDriveController::routes();
 
 });
 
