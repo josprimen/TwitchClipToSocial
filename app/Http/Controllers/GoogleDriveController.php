@@ -79,7 +79,10 @@ class GoogleDriveController extends Controller
             Log::info('Exito en la subida a google drive. Url: ' . $fileUrl);
 
             // Devolver la URL del archivo
-            return $fileUrl;
+            return [
+                'fileUrl' => $fileUrl,
+                'fileId' => $file->id
+            ];
         }catch (\Exception $e){
             Log::info('Fallo en la subida a Drive: ' . $e->getMessage());
         }

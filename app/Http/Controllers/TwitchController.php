@@ -58,7 +58,8 @@ class TwitchController extends Controller
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
             try {
                 $url_video = $this->tratamientoVideoController->transformarVideo916($video->url);
-                $url_video = $this->googleDriveController->uploadToGoogleDrive($url_video);
+                $drive_upload_result = $this->googleDriveController->uploadToGoogleDrive($url_video);
+                $url_video = $drive_upload_result['fileUrl'];
                 $flag_con_descarga = true;
                 Log::info('Usando formato vertical');
 
@@ -67,7 +68,7 @@ class TwitchController extends Controller
                 Log::info('Ha habido un fallo en el formato vertical o subida a drive' . $e);
 
             }
-            $hastags = ' #' . $video->clip->canal->nombre_canal . ' #TwitchClips #HighlightReel #ClipOfTheDay #TwitchHighlight #TwitchCommunity #ContentCreators';
+            $hastags = ' #' . $video->clip->canal->nombre_canal;
             $caption = $video->clip->titulo_clip . $hastags ?? 'JAJAJAJAJA';
 
             // Utiliza http_build_query para construir la cadena de consulta de manera segura
@@ -105,7 +106,10 @@ class TwitchController extends Controller
             $video->id_contenedor_publicacion = json_decode($response)->id;
             $video->save();
 
-//            if ($flag_con_descarga) unlink($url_video);
+            if ($flag_con_descarga){
+                unlink($url_video);
+                $this->googleDriveController->deleteFromGoogleDrive($drive_upload_result['fileId']);
+            }
 
         } catch (\Exception $e) {
             dd($e);
