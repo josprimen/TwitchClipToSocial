@@ -58,7 +58,6 @@ class TwitchController extends Controller
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
             try {
                 $url_video = $this->tratamientoVideoController->transformarVideo916($video->url);
-                $delete_path_video = $url_video;
                 $drive_upload_result = $this->googleDriveController->uploadToGoogleDrive($url_video);
                 $url_video = $drive_upload_result['fileUrl'];
                 $flag_con_descarga = true;
@@ -108,7 +107,7 @@ class TwitchController extends Controller
             $video->save();
 
             if ($flag_con_descarga){
-                unlink($delete_path_video);
+                unlink($url_video);
                 $this->googleDriveController->deleteFromGoogleDrive($drive_upload_result['fileId']);
             }
 
