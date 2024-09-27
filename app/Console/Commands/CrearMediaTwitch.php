@@ -8,6 +8,7 @@ use App\Http\Controllers\TwitchController;
 use App\Models\UrlCanal;
 use App\Models\UrlClip;
 use App\Models\Video;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -35,7 +36,12 @@ class CrearMediaTwitch extends Command
         try {
             $this->comment(PHP_EOL . "CREAR MEDIA" . PHP_EOL);
 
-            $clip = UrlClip::where('obtenido_video', false)->inRandomOrder()->first();
+
+            if (UrlClip::where('obtenido_video', false)->where('created_at', '>=', Carbon::today())->count() >= 1){
+                $clip = UrlClip::where('obtenido_video', false)->where('created_at', '>=', Carbon::today())->inRandomOrder()->first();
+            }else{
+                $clip = UrlClip::where('obtenido_video', false)->inRandomOrder()->first();
+            }
 
             $video = $this->contolador_canales->recopilarUrlVideos($clip->id);
 
