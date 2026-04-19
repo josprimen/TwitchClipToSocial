@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: twitchclips
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=${DB_CONNECTION:-mysql}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CHROMIUM_PATH=/usr/bin/chromium
+      - NODE_BINARY_PATH=/usr/bin/node
+      - NPM_BINARY_PATH=/usr/bin/npm
+      - GOOGLE_KEY=${GOOGLE_KEY}
+      - GOOGLE_ID=${GOOGLE_ID}
+      - GOOGLE_SECRET=${GOOGLE_SECRET}
+      - GOOGLE_FOLDER_ID=${GOOGLE_FOLDER_ID}
+      - YOUTUBE_CLIENT_ID=${YOUTUBE_CLIENT_ID}
+      - YOUTUBE_CLIENT_SECRET=${YOUTUBE_CLIENT_SECRET}
+    volumes:
+      # Sincronización completa del código
+      - .:/var/www/html
+      
+      # Excepciones: mantener solo en contenedor
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+      - /var/www/html/storage/framework
+      - /var/www/html/bootstrap/cache
+      
+      # Logs accesibles desde host
+      - ./storage/logs:/var/www/html/storage/logs
+    networks:
+      - twitchclips-network
+    security_opt:
+      - seccomp:unconfined
+    shm_size: '2gb'
+
+networks:
+  twitchclips-network:
+    driver: bridge
