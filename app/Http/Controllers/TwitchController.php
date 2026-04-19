@@ -26,10 +26,13 @@ class TwitchController extends Controller
 
     protected $tratamientoVideoController;
 
-    public function __construct(TratamientoVideoController $tratamientoVideoController, GoogleDriveController $googleDriveController)
+    protected $youtubeShortsController;
+
+    public function __construct(TratamientoVideoController $tratamientoVideoController, GoogleDriveController $googleDriveController, YouTubeShortsController $youtubeShortsController)
     {
         $this->tratamientoVideoController = $tratamientoVideoController;
         $this->googleDriveController = $googleDriveController;
+        $this->youtubeShortsController = $youtubeShortsController;
     }
 
     public static function routes()
@@ -51,6 +54,7 @@ class TwitchController extends Controller
         try {
             $video = Video::findOrFail($id_video);
             $flag_con_descarga = false;
+            $url_video_local = null; // Inicializar variable
 
             $curl = curl_init();
 
@@ -58,6 +62,7 @@ class TwitchController extends Controller
             $access_token = env('API_GRAPH_ACCESS_TOKEN');
             try {
                 $url_video = $this->tratamientoVideoController->transformarVideo916($video->url);
+                $url_video_local = $url_video; // Guardar ruta local antes de pisar con URL de Drive
                 $drive_upload_result = $this->googleDriveController->uploadToGoogleDrive($url_video);
                 $url_video = $drive_upload_result['fileUrl'];
                 $flag_con_descarga = true;
@@ -67,6 +72,32 @@ class TwitchController extends Controller
                 $url_video = $video->url;
                 Log::info('Ha habido un fallo en el formato vertical o subida a drive' . $e);
 
+            }
+            
+            // Publicar en YouTube Shorts usando el archivo local (fuera del try-catch de Drive)
+            try {
+                if ($url_video_local && file_exists($url_video_local)) {
+                    $hastags_youtube = ' #' . $video->clip->canal->nombre_canal;
+                    $titulo_youtube = $video->clip->titulo_clip . $hastags_youtube . ' #Shorts' ?? 'JAJAJAJAJA';
+                    $descripcion_youtube = $titulo_youtube . ' ' . $hastags_youtube;
+                    
+                    $resultado_youtube = $this->youtubeShortsController->uploadShort(
+                        $url_video_local,
+                        $titulo_youtube,
+                        $descripcion_youtube,
+                        'public',
+                        [$video->clip->canal->nombre_canal, 'twitch', 'clips', 'gaming']
+                    );
+                    
+                    Log::info('Short subido a YouTube exitosamente', [
+                        'video_id' => $resultado_youtube['video_id'],
+                        'url' => $resultado_youtube['url']
+                    ]);
+                } else {
+                    Log::info('No se pudo subir a YouTube: archivo local no disponible');
+                }
+            } catch (\Exception $e) {
+                Log::info('Error al subir Short a YouTube (no afecta a Instagram): ' . $e->getMessage());
             }
             $hastags = ' #' . $video->clip->canal->nombre_canal;
             $caption = $video->clip->titulo_clip . $hastags ?? 'JAJAJAJAJA';
@@ -107,7 +138,9 @@ class TwitchController extends Controller
             $video->save();
 
             if ($flag_con_descarga){
-                unlink($url_video);
+                if ($url_video_local && file_exists($url_video_local)) {
+                    unlink($url_video_local);
+                }
                 $this->googleDriveController->deleteFromGoogleDrive($drive_upload_result['fileId']);
             }
 

@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
     \App\Http\Controllers\CanalesController::routes();
     \App\Http\Controllers\TratamientoVideoController::routes();
     \App\Http\Controllers\GoogleDriveController::routes();
+    \App\Http\Controllers\YouTubeAuthController::routes();
+    \App\Http\Controllers\YouTubeShortsController::routes();
 
 });
 
